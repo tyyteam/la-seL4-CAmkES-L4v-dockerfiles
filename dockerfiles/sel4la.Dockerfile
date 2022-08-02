@@ -10,8 +10,8 @@ FROM $BASE_IMG
 
 LABEL ORGANISATION="TyyTeam"
 
-COPY cross-tools /opt/
+COPY cross-tools /opt/cross-tools/
 
-RUN echo 'export PATH=${PATH}:/opt/cross-tools/bin' >> /etc/profile
+ENV PATH "${PATH}:/opt/cross-tools/bin/"
 
 ENV LANG en_AU.UTF-8
