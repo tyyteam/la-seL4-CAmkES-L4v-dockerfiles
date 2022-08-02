@@ -12,6 +12,10 @@ LABEL ORGANISATION="TyyTeam"
 
 COPY cross-tools /opt/cross-tools/
 
+RUN rm -rf /opt/cross-tools/lib/bfd-plugins/libdep.so
+
 ENV PATH "${PATH}:/opt/cross-tools/bin/"
 
-ENV LANG en_AU.UTF-8
+ENV LC_ALL   C
+ENV LANG     C
+ENV LANGUAGE C
