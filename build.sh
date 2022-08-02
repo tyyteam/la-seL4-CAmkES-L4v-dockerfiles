@@ -114,6 +114,13 @@ build_sel4()
     build_internal_image "$BASETOOLS_IMG" sel4.Dockerfile "$DOCKERHUB$SEL4_IMG"
 }
 
+build_sel4_la()
+{
+    curl -OL "https://github.com/foxsen/qemu-loongarch-runenv/releases/download/toolchain/loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz"
+    tar xf loongarch64-clfs-2021-12-18-cross-tools-gcc-full.tar.xz
+    docker build . -f dockerfiles/sel4la.Dockerfile -t gootal/la-sel4
+}
+
 build_camkes()
 {
     build_image "$SEL4_IMG$IMG_POSTFIX" camkes.Dockerfile "$CAMKES_IMG"
