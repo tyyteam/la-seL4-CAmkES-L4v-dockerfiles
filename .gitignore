@@ -27,4 +27,6 @@ tags
 # Persistent undo
 [._]*.un~
 
+.vscode
+
 # End of https://www.gitignore.io/api/vim

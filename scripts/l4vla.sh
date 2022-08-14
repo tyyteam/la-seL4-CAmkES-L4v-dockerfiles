@@ -74,8 +74,10 @@ if [ "$MAKE_CACHES" = "yes" ] ; then
     # components, so we have them cached.
     mkdir -p "$TEMP_L4V_LOCATION"
     pushd "$TEMP_L4V_LOCATION"
-        repo init -u "${SCM}/seL4/verification-manifest.git" --depth=1
+        repo init -u "${SCM}/seL4/verification-manifest.git" --depth=1 --repo-url=https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/
         repo sync -c
+        rm -rf l4v
+        git clone https://github.com/tyyteam/la-l4v.git l4v
         pushd l4v
             ./isabelle/bin/isabelle components -a
             pushd spec/haskell

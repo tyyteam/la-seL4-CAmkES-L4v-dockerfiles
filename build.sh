@@ -71,6 +71,31 @@ build_internal_image()
         .
 }
 
+build_internal_image_la()
+{
+    base_img="$1"
+    dfile_name="$2"
+    img_name="$3"
+    shift 3  # any params left over are just injected into the docker command
+             # presumably as flags
+
+
+    build_args_to_pass_to_docker=$(echo "$build_args" | grep "=" | awk '{print "--build-arg", $1}')
+    # shellcheck disable=SC2086
+    $DOCKER_BUILD $DOCKER_FLAGS \
+        --build-arg BASE_IMG="$base_img" \
+        --build-arg SCM="$SCM" \
+        --build-arg HTTP_PROXY=http://192.168.137.1:7890/ \
+        --build-arg HTTPS_PROXY=http://192.168.137.1:7890/ \
+        $build_args_to_pass_to_docker \
+        -f "$DOCKERFILE_DIR/$dfile_name" \
+        -t "$img_name" \
+        "$@" \
+        .
+
+
+}
+
 build_image()
 {
     base_img="$1"
@@ -79,6 +104,16 @@ build_image()
     shift 3
 
     build_internal_image "$DOCKERHUB$base_img" "$dfile_name" "$DOCKERHUB$img_name" "$@"
+}
+
+build_image_la()
+{
+    base_img="$1"
+    dfile_name="$2"
+    img_name="$3"
+    shift 3
+
+    build_internal_image_la "$DOCKERHUB$base_img" "$dfile_name" "gootal/$img_name" "$@"
 }
 
 apply_software_to_image()
@@ -129,6 +164,11 @@ build_camkes()
 build_l4v()
 {
     build_image "$CAMKES_IMG$IMG_POSTFIX" l4v.Dockerfile "$L4V_IMG"
+}
+
+build_l4v_la()
+{
+    build_image_la "$CAMKES_IMG$IMG_POSTFIX" l4vla.Dockerfile "la-l4v"
 }
 
 ############################################

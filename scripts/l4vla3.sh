@@ -29,53 +29,55 @@ test -d "$DIR" || DIR=$PWD
 # tmp space for building L4v for caching
 : "${TEMP_L4V_LOCATION:=/tmp/verification}"
 
-possibly_toggle_apt_snapshot
+# possibly_toggle_apt_snapshot
 
-as_root apt-get update -q
-as_root apt-get install -y --no-install-recommends \
-        librsvg2-bin \
-        libwww-perl \
-        libxslt-dev \
-        libxml2-dev \
-        openssh-client \
-        mercurial \
-        texlive-bibtex-extra \
-        texlive-fonts-recommended \
-        texlive-latex-extra \
-        texlive-metapost \
-        texlive-plain-generic \
-        dnsutils\
-        # end of list
+# as_root apt-get update -q
+# as_root apt-get install -y --no-install-recommends \
+#         librsvg2-bin \
+#         libwww-perl \
+#         libxslt-dev \
+#         libxml2-dev \
+#         openssh-client \
+#         mercurial \
+#         texlive-bibtex-extra \
+#         texlive-fonts-recommended \
+#         texlive-latex-extra \
+#         texlive-metapost \
+#         texlive-plain-generic \
+#         dnsutils\
+#         # end of list
 
-# dependencies for testing
-as_root apt-get install -y --no-install-recommends \
-        less \
-        python3-psutil \
-        python3-lxml \
-        # end of list
+# # dependencies for testing
+# as_root apt-get install -y --no-install-recommends \
+#         less \
+#         python3-psutil \
+#         python3-lxml \
+#         # end of list
 
-# looks like there is no Debian package for mlton any more
-MLTON=mlton-20210117-1.amd64-linux-glibc2.31
-wget https://github.com/MLton/mlton/releases/download/on-20210117-release/$MLTON.tgz
-tar  -xzC /opt -f $MLTON.tgz
-ln -s /opt/$MLTON opt/mlton
-rm $MLTON.tgz
+# # looks like there is no Debian package for mlton any more
+# MLTON=mlton-20210117-1.amd64-linux-glibc2.31
+# wget https://github.com/MLton/mlton/releases/download/on-20210117-release/$MLTON.tgz
+# tar  -xzC /opt -f $MLTON.tgz
+# ln -s /opt/$MLTON opt/mlton
+# rm $MLTON.tgz
 
-# Get l4v and setup isabelle
-try_nonroot_first mkdir "$ISABELLE_DIR" || chown_dir_to_user "$ISABELLE_DIR"
-ln -s "$ISABELLE_DIR" "$HOME/.isabelle"
-mkdir -p "$HOME/.isabelle/etc"
+# # Get l4v and setup isabelle
+# try_nonroot_first mkdir "$ISABELLE_DIR" || chown_dir_to_user "$ISABELLE_DIR"
+# ln -s "$ISABELLE_DIR" "$HOME/.isabelle"
+# mkdir -p "$HOME/.isabelle/etc"
 
-ISABELLE_SETTINGS_LOCATION="$HOME/.isabelle/etc/settings"
-cp "$NEW_ISABELLE_SETTINGS" "$ISABELLE_SETTINGS_LOCATION"
+# ISABELLE_SETTINGS_LOCATION="$HOME/.isabelle/etc/settings"
+# cp "$NEW_ISABELLE_SETTINGS" "$ISABELLE_SETTINGS_LOCATION"
 
 if [ "$MAKE_CACHES" = "yes" ] ; then
     # Get a copy of the L4v repo, and build all the isabelle and haskell
     # components, so we have them cached.
     mkdir -p "$TEMP_L4V_LOCATION"
     pushd "$TEMP_L4V_LOCATION"
-        repo init -u "${SCM}/seL4/verification-manifest.git" --depth=1
+        repo init -u "${SCM}/seL4/verification-manifest.git" --depth=1 --repo-url=https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/
         repo sync -c
+        rm -rf l4v
+        git clone https://github.com/tyyteam/la-l4v.git l4v
         pushd l4v
             ./isabelle/bin/isabelle components -a
             pushd spec/haskell
