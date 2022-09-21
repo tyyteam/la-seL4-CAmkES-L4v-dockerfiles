@@ -7,6 +7,7 @@
 # Docker-compatible image tool to use (could also be 'podman')
 DOCKER ?= docker
 DOCKERHUB ?= trustworthysystems/
+LA_DOCKERHUB ?= gootal/
 
 # Base images
 DEBIAN_IMG ?= debian:bullseye
@@ -14,6 +15,7 @@ BASETOOLS_IMG ?= base_tools
 
 # Core images
 SEL4_IMG ?= sel4
+LA_SEL4_IMG ?= la-sel4
 CAMKES_IMG ?= camkes
 L4V_IMG ?= l4v
 
@@ -110,6 +112,9 @@ user_sel4: build_user_sel4 user_run
 .PHONY: user_sel4-riscv
 user_sel4-riscv: build_user_sel4-riscv user_run
 
+.PHONY: user_sel4-loongarch
+user_sel4-loongarch: build_user_sel4-loongarch user_run
+
 .PHONY: user_camkes
 user_camkes: EXTRA_DOCKER_RUN_ARGS +=  --group-add stack
 user_camkes: build_user_camkes user_run
@@ -184,8 +189,25 @@ build_user: run_checks
 		--build-arg=GROUP=$(shell id -gn) \
 		-f dockerfiles/user.Dockerfile \
 		-t $(USER_IMG) .
+.PHONY: la_build_user
+la_build_user: run_checks
+	$(DOCKER_BUILD) $(DOCKER_FLAGS) \
+		--build-arg=USER_BASE_IMG=$(LA_DOCKERHUB)$(USER_BASE_IMG) \
+		-f dockerfiles/extras.Dockerfile \
+		-t $(EXTRAS_IMG) \
+		.
+	$(DOCKER_BUILD) $(DOCKER_FLAGS) \
+		--build-arg=EXTRAS_IMG=$(EXTRAS_IMG) \
+		--build-arg=UNAME=$(shell whoami) \
+		--build-arg=UID=$(shell id -u) \
+		--build-arg=GID=$(shell id -g) \
+		--build-arg=GROUP=$(shell id -gn) \
+		-f dockerfiles/user.Dockerfile \
+		-t $(USER_IMG) .
 build_user_sel4: USER_BASE_IMG = $(SEL4_IMG)
 build_user_sel4: build_user
+build_user_sel4-loongarch: USER_BASE_IMG = $(LA_SEL4_IMG)
+build_user_sel4-loongarch: la_build_user
 build_user_camkes: USER_BASE_IMG = $(CAMKES_IMG)
 build_user_camkes: build_user
 build_user_l4v: USER_BASE_IMG = $(L4V_IMG)
